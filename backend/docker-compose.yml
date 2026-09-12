@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: surakkhabd-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=surakkhabd
+      - POSTGRES_USER=surakkhabd
+      - POSTGRES_PASSWORD=dev_password_change_me
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U surakkhabd"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: surakkhabd-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: surakkhabd-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=surakkhabd999@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=s#r@k$h/b9
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
+
+# ─────────────────────────────────────────────────────────────
+# HOW TO USE:
+#   1. Install Docker Desktop (docker.com/products/docker-desktop)
+#   2. Put this file in your backend project root as `docker-compose.yml`
+#   3. Run:  docker compose up -d
+#   4. Check it's running:  docker compose ps
+#
+# Connection details for your Node.js .env file:
+#   DATABASE_URL=postgresql://surakkhabd:dev_password_change_me@localhost:5432/surakkhabd
+#   REDIS_URL=redis://localhost:6379
+#
+# pgAdmin (optional GUI to browse the database):
+#   Open http://localhost:5050  →  login with admin@surakkhabd.local / admin
+#   Add New Server → Host: postgres, Port: 5432, User: surakkhabd, Password: dev_password_change_me
+#
+# To stop everything:      docker compose down
+# To stop AND wipe data:   docker compose down -v
+# ─────────────────────────────────────────────────────────────
